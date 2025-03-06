@@ -1,6 +1,5 @@
 # Convergence of the loss function surface in transformer neural network architectures
 
-<!-- Change `intsystems/2025-Project-182` to `intsystems/your-repository`-->
 [![License](https://badgen.net/github/license/intsystems/2025-Project-182?color=green)](https://github.com/intsystems/2025-Project-182/blob/main/LICENSE)
 [![GitHub Contributors](https://img.shields.io/github/contributors/intsystems/2025-Project-182)](https://github.com/intsystems/2025-Project-182/graphs/contributors)
 [![GitHub Issues](https://img.shields.io/github/issues-closed/intsystems/2025-Project-182.svg?color=0088ff)](https://github.com/intsystems/2025-Project-182/issues)
@@ -36,9 +35,9 @@ Training a neural network involves searching for the minimum point of the loss f
 
 If you find our work helpful, please cite us.
 ```BibTeX
-@article{citekey,
+@article{petrov2025transformerlandscape,
     title={Convergence of the loss function surface in transformer neural network architectures},
-    author={Egor Petrov, Nikita Kiselev (consultant), Andrey Grabovoy (advisor)},
+    author={Egor Petrov, Nikita Kiselev, Vladislav Meshkov, Andrey Grabovoy},
     year={2025}
 }
 ```
