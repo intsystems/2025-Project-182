@@ -37,8 +37,8 @@ Training a neural network involves searching for the minimum point of the loss f
 If you find our work helpful, please cite us.
 ```BibTeX
 @article{citekey,
-    title={Title},
-    author={Name Surname, Name Surname (consultant), Name Surname (advisor)},
+    title={Convergence of the loss function surface in transformer neural network architectures},
+    author={Egor Petrov, Nikita Kiselev (consultant), Andrey Grabovoy (advisor)},
     year={2025}
 }
 ```
