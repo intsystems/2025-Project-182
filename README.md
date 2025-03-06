@@ -1,23 +1,23 @@
 # Title
 
-<!-- Change `kisnikser/m1p-template` to `intsystems/your-repository`-->
-[![License](https://badgen.net/github/license/kisnikser/m1p-template?color=green)](https://github.com/kisnikser/m1p-template/blob/main/LICENSE)
-[![GitHub Contributors](https://img.shields.io/github/contributors/kisnikser/m1p-template)](https://github.com/kisnikser/m1p-template/graphs/contributors)
-[![GitHub Issues](https://img.shields.io/github/issues-closed/kisnikser/m1p-template.svg?color=0088ff)](https://github.com/kisnikser/m1p-template/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr-closed/kisnikser/m1p-template.svg?color=7f29d6)](https://github.com/kisnikser/m1p-template/pulls)
+<!-- Change `intsystems/2025-Project-182` to `intsystems/your-repository`-->
+[![License](https://badgen.net/github/license/intsystems/2025-Project-182?color=green)](https://github.com/intsystems/2025-Project-182/blob/main/LICENSE)
+[![GitHub Contributors](https://img.shields.io/github/contributors/intsystems/2025-Project-182)](https://github.com/intsystems/2025-Project-182/graphs/contributors)
+[![GitHub Issues](https://img.shields.io/github/issues-closed/intsystems/2025-Project-182.svg?color=0088ff)](https://github.com/intsystems/2025-Project-182/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr-closed/intsystems/2025-Project-182.svg?color=7f29d6)](https://github.com/intsystems/2025-Project-182/pulls)
 
 <table>
     <tr>
         <td align="left"> <b> Author </b> </td>
-        <td> Name Surname </td>
+        <td> Egor Petrov </td>
     </tr>
     <tr>
         <td align="left"> <b> Consultant </b> </td>
-        <td> Name Surname, PhD/DSc </td>
+        <td> Nikita Kiselev </td>
     </tr>
     <tr>
         <td align="left"> <b> Advisor </b> </td>
-        <td> Name Surname, PhD/DSc </td>
+        <td> Andrey Grabovoy, PhD </td>
     </tr>
 </table>
 
