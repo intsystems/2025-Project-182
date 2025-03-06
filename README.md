@@ -1,4 +1,4 @@
-# Title
+# Convergence of the loss function surface in transformer neural network architectures
 
 <!-- Change `intsystems/2025-Project-182` to `intsystems/your-repository`-->
 [![License](https://badgen.net/github/license/intsystems/2025-Project-182?color=green)](https://github.com/intsystems/2025-Project-182/blob/main/LICENSE)
