@@ -9,7 +9,7 @@
 | Topic | Title | Year | Authors | Paper | Code | Summary |
 | :--- | :--- | :---: | :--- | :---: | :---: | :--- |
 | Main Articles | Unraveling the Hessian: A Key to Smooth Convergence in Loss Function Landscapes | 2024 | Nikita Kiselev et al. | [arXiv](https://arxiv.org/abs/2409.11995) | [GitHub](https://github.com/kisnikser/landscape-hessian) | Fully-Contedet NN Landscape study |
-|  | ConvNets Landscape Convergence: Hessian-Based Analysis of Matricized Networks | 2024 | Vladislav Meshkov et al. | [arXiv ](https://ieeexplore.ieee.org/document/10899113) | [GitHub]() | ConvNet Landscape study |
+|  | ConvNets Landscape Convergence: Hessian-Based Analysis of Matricized Networks | 2024 | Vladislav Meshkov et al. | [IEEE](https://ieeexplore.ieee.org/document/10899113) | [GitHub]() | ConvNet Landscape study |
 |  | Kiselev BS Thesis Paper | 2024 | Nikita Kiselev et al. | [arXiv ]() | [GitHub]() | A work that explores the desired area and reveals the basic definitions |
 |  | A Theoretical Understanding of Shallow Vision Transformers: Learning, Generalization, and Sample Complexity | 2023 | Hongkang Li et al. | [OpenReview](https://openreview.net/forum?id=jClGv3Qjhb) | [GitHub]() | The work carries out the Visual Transformer analisys, studying sample complexity for zero generalization error, might be similar to sample size research |
 |  | Understanding Generalization in Transformers: Error Bounds and Training Dynamics Under Benign and Harmful Overfitting | 2025 |  Yingying Zhang et al. | [arXiv ](https://arxiv.org/abs/2502.12508) | [GitHub]() | Continue the idea of generalization error analisys, studying the training dynamics |
