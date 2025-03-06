@@ -19,5 +19,5 @@
 |  | Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs | 2018 | Timur Garipov et al. | [arXiv ](https://arxiv.org/pdf/1802.10026) | [GitHub]() | The study  shows that the optima of these complex loss functions are in fact connected by simple curves |
 |  | LossLens: Diagnostics for Machine Learning through Loss Landscape Visual Analytics | 2024 | Tiankai Xie et al. | [arXiv ](https://arxiv.org/pdf/2412.13321) | [GitHub]() | Focusing on visual aspect the study provides information about loss landscapes in deep NN, covering the possibilities of finding minimal sample size|
 | Transformers | Attention Is All You Need | 2017 | Ashish Vaswani et al. | [arXiv ](https://arxiv.org/abs/1706.03762) | [GitHub]() | Basic work on transformer architecture and attention mechanism |
-|  | TODO | TODO | TODO | TODO | TODO | TODO |
+|  | What Does It Mean to Be a Transformer? Insights from a Theoretical Hessian Analysis | 2024 | Weronika Ormaniec et al. | [arXiv](https://arxiv.org/abs/2410.10986) | [GitHub]() | In the paper deep theoretcal analisys is provided similar to our main paper method |
 |  | TODO | TODO | TODO | TODO | TODO | TODO |
