@@ -118,34 +118,148 @@
 
 \section{Introduction}\label{sec:intro}
 
-TODO
+Neural networks are becoming more and more popular these days as a way to solve many practical problems. In particular, the Transformer \cite{vaswani2017attention} architecture has revolutionized the world of text processing, as well as many other popular tasks, such as image processing with Visual Transformer \cite{wu2020visualtransformer}. Current results show that as the training sample size increases, there is a trend for the quality of the \cite{kaplan2020scaling} model to increase, but there are many areas, such as, for example, processing specific medical data, where the datasets are significantly limited \cite{moreno2024medicalfewshot} and obtaining new sample objects is costly. Moreover, many models using neural networks and transformers require large computational power and resources. 
+
+In our work, we propose an analysis of the model and loss function, as applied to the Transformer architecture, on the minimum sample size to achieve a predetermined quality set in advance. Based on the approach proposed in the paper \cite{kiselev2024unraveling}, we provide a theoretical analysis of the Transformer architecture by considering the differences between the loss function when adding the next sample item to the dataset. 
+
+We obtain theoretical estimates for the convergence of this difference in a transformer neural
+network as the sample size approaches infinity. These results are derived through the analysis of the
+Hessian spectrum. These estimates allow us to determine the dependence of this difference on the
+structure of the neural network. We
+empirically verify these theoretical results by examining the behavior of the loss surface on various
+datasets. The obtained plots substantiate the validity of the theoretical calculations.
 
 \textbf{Contributions.} Our contributions can be summarized as follows:
 \begin{itemize}
-    \item We present...
-    \item We demonstrate the validity of our theoretical results through empirical studies...
-    \item We highlight the implications of our findings for...
+    \item We apply a Hessian-based approach to
+        find the critical sufficient dataset size for transformer architectures.
+    \item We demonstrate the validity of our theoretical results through empirical studies on the task of image classification using ViT's
+    \item We highlight the implications of our findings for practical data collection strategies, showing how the detection of
+        a sufficient dataset size can reduce computation time.
 \end{itemize}
 
-\textbf{Outline.} The rest of the paper is organized as follows...
+\textbf{Outline.} TODO REFERENCES The rest of the paper is organized as follows. In Section 2, we review related work, categorizing existing research into key topics and highlighting their main contributions. Section 3 introduces the notation and presents preliminary calculations essential for our analysis. In Section 4, we derive theoretical bounds for the norm of the Hessian matrix and the norm of the difference between loss functions. Section 5 provides an empirical study validating these theoretical results. Sections 6 and 7 discuss and summarize our findings, offering insights and conclusions. Additional experiments and proofs of theorems are included in Appendix A.
 
 \section{Related Work}\label{sec:rw}
 
-\textbf{Topic \#1.}
-TODO
+\textbf{Geometry of Neural Network Loss Landscapes}
 
-\textbf{Topic \#2.}
-TODO
+The geometry of neural network loss landscapes, often analyzed via the Hessian matrix, is a well-studied area. \cite{fort2019emergentpropertieslocalgeometry} shows that in multi-label classification, the landscape exhibits exactly $K$ directions of high curvature, where $K$ is the number of classes. \cite{pmlr-v70-pennington17a} use random matrix theory to explore loss surface dynamics and optimization. \cite{garipov2018losssurfacesmodeconnectivity} models linear mode connectivity, demonstrating minima connectivity, while \cite{singh2022phenomenologydoubledescentfinitewidth} explains double descent in finite-width networks. \cite{wang2023instabilitieslargelearningrate} notes landscape flattening under large learning rates. Studies like \cite{draxler2019essentiallynobarriers, garipov2018losssurfacesmodeconnectivity, nguyen2017losssurfacedeepwide} further explore minima connectivity and landscape structure. However, none of these address how landscape geometry stabilizes with increasing dataset size, a gap our work targets.
+
+\textbf{Hessian-Based Analysis and Generalization}
+
+The Hessian matrix is key to understanding convergence, optimization, and generalization. \cite{kiselev2024unraveling} analyzes fully connected networks, showing how the Hessian spectrum reveals convergence smoothness, while \cite{meshkov2024convnets} extends this to convolutional networks, noting the Hessian’s low effective rank. Yet, these works overlook the impact of sample size on the loss landscape, especially for transformers, an area our study addresses.
+
+\textbf{Loss Landscapes in Transformers}
+
+Transformers, introduced by \cite{vaswani2017attention}, are central to modern deep learning. \cite{ormaniec2024attentionhessian} provides a theoretical Hessian analysis of transformers, paralleling methods for fully connected networks. \cite{li2023theoreticalunderstandingshallowvision} studies sample complexity in vision transformers, akin to our sample size focus, while \cite{zhang2025understandinggeneralizationtransformers} analyzes generalization and dynamics. \cite{anonymous2024stagewisedevelopmenttransformers} offers a geometric view of transformer landscapes but ignores minimal sample size. These studies advance transformer landscape understanding but do not explore convergence with increasing dataset size, a gap our work fills.
+
+\textbf{Dataset Size and Loss Landscape Convergence}
+
+Dataset size’s impact on loss landscapes, particularly for transformers, is underexplored. \cite{hoffmann2022training} questions optimal dataset-model size balances, noting computational costs, and \cite{wu2017towards} links sufficient samples to flatter minima. However, the concept of a minimum viable dataset size—where additional data cause negligible landscape changes—lacks theoretical grounding. \cite{xie2024losslens} hints at identifying such thresholds via visualization but offers no framework. Our work extends the Hessian-based analyses of \cite{kiselev2024unraveling, meshkov2024convnets} to transformers, leveraging \cite{ormaniec2024attentionhessian} to derive convergence bounds as a function of sample size, addressing this critical gap.
 
 \section{Preliminaries}\label{sec:prelim}
 
 \subsection{General notation}
 
-In this section, we introduce the general notation used in the rest of the paper and the basic assumptions. 
+In this section, we introduce the general notation used in the rest of the paper and the basic assumptions similar to \cite{} TODO ARTEM'S WORK.
 
-\subsection{Assumptions} 
+We consider a $K$-label classification problem.
+So, let's consider $p(y|x)$ a conditional probability, which maps unobserved variable $x \in \mathcal{X}$ to the corresponding
+output $y \in \mathcal{Y}$. We consider $\mathcal{Y}$ is a subspace (or same space) as $\mathbb{R}^K$. Let $f_{\omega}(\cdot)$
+be a neural network with a list of parameters $\omega$. Let $\Omega$ be a space of parameters ($\omega \in \Omega$).
 
-TODO
+Let
+$$\mathcal{D} = \left\{ (x_i, y_i) \, | \, i = 1, \dots, m \right\}$$
+be a given dataset of size $m$ consists of i.i.d.
+samples. Let $l(\cdot, \cdot)$ be a given loss function (e.g. cross-entrophy) where first argument refers to neural network's
+result and the second argument refers to the true answer. To simplify, define: $$l_i(\omega) := l(f_{\omega}(x_i), y_i).$$
+
+\begin{definition}
+  The empirical loss function for the first $k$ elements is:
+  $$\mathcal{L}_k(\omega) = \frac1k \sum\limits_1^k l_i(\omega), \,\, \mathcal{L}(\omega) := \mathcal{L}_m(\omega).$$
+\end{definition}
+
+Thus, the difference between losses for neighbouring samplem sizes is:
+$$\mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega) = \frac{l_{k}(\omega) - \mathcal{L}_{k-1}(\omega)}{k}.$$
+
+\begin{definition}
+  Let the Hessian of $\mathcal{L}_k(\omega)$ be:
+  $$\mathcal{H}_k(\omega) = \nabla^2_{\omega}\mathcal{L}_k(\omega) = \frac1k \sum\limits_1^k \nabla^2_{\omega} l_i(\omega).$$
+\end{definition}
+
+\begin{definition}
+  To calculate the overall loss landscape changing, one has to integrate the absolute difference for the entire parameter space.
+  We define \textbf{weighted difference} as:
+  $$\Delta_{k} = \int \left( \mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega) \right)^2 p(\omega) d\omega,$$
+  where $p(\omega)$ describes the priority of the particular parameter points so we can make $p(\omega)$ have higher values
+  next to the local minima.
+\end{definition}
+
+We firther investigate this difference and aimed at exploration of how adding a new object to the dataset changes the value.
+We interested in convergence of this value and properties of loss function when the training dataset size limits to $\infty$.
+
+
+\begin{definition}
+  Let $\Delta$ be a positive hyperparameter that indicates the stop-difference for $\Delta_k$. If
+  $$\Delta_{k^*} < \Delta \wedge \left( \forall k < k^*: \, \Delta_k \geq \Delta \right),$$
+  we can say that $k^*$ samples in the dataset are enough to describe the distribution of data from the general population.
+  We call $k^*$ as \textbf{sufficient}.
+\end{definition}
+
+\subsection{Assumptions}
+
+\begin{assumption}
+  Let $\omega^*$ be the local minimum of both $\mathcal{L}_{k-1}(\omega)$ and $\mathcal{L}_{k}(\omega)$.
+  Thus, $$\nabla \mathcal{L}_{k-1}(\omega^*) = \nabla \mathcal{L}_{k}(\omega^*) = 0.$$
+\end{assumption}
+
+This assumption allows us to explore the behavior and the geometry of the loss function landscape at only one point.
+
+Furthermore, using second-order Taylor's approximation for $\mathcal{L}_{k}(\omega)$ at $\omega^*$ we get:
+$$\mathcal{L}_{k}(\omega) \approx \mathcal{L}_{k}(\omega^*) + \frac12 (\omega - \omega^*)^T \mathcal{H}_k(\omega^*)
+  (\omega - \omega^*)$$
+
+\begin{assumption}
+  We can assume parameters w to be random, which will lead to quite natural condition: p(w) can be even a prior
+  distribution of w, so: $$\Delta_{k} = \mathbb{E}_{p(\omega)} \left( \mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega)
+    \right)^2 = \mathbb{D} \left( \mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega) \right) + \left( \mathbb{E} \left(
+      \mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega) \right) \right)^2$$
+\end{assumption}
+
+\subsection{Transformers and Self-Attention Layers}
+To apply the above concepts to transformer architectures, we define the operation of a single self-attention layer, following a generalized approach similar to \cite{ormaniec2024attentionhessian}, which builds on the foundational transformer framework of \cite{vaswani2017attention}. This definition will enable us to analyze the Hessian's structure and its implications for loss landscape convergence as the dataset size increases.
+
+Consider a sequence of token embeddings $X \in \mathbb{R}^{L \times d}$, where $L$ is the sequence length and $d$ is the embedding dimension. A self-attention layer maps $X$ to an output sequence $F(X) \in \mathbb{R}^{L \times d}$ via the following operation:
+\[
+F(X) = A(X) X W_V,
+\]
+where $W_V \in \mathbb{R}^{d \times d}$ is the value weight matrix, and $A(X) \in \mathbb{R}^{L \times L}$ is the self-attention matrix, defined as:
+\[
+A(X) = a(T(X)).
+\]
+Here, $T(X) \in \mathbb{R}^{L \times L}$ is the query-key similarity transformation, and $a : \mathbb{R}^{L \times L} \to \mathbb{R}^{L \times L}$ is an activation function. In the classical self-attention mechanism \cite{vaswani2017attention}, the similarity transformation is given by:
+\[
+T(X) = \frac{X W_Q W_K^\top X^\top}{\sqrt{d_K}},
+\]
+where $W_Q, W_K \in \mathbb{R}^{d \times d_K}$ are the query and key weight matrices, respectively, $d_K$ is the key dimension, and $a = \text{softmax}$ (applied row-wise). This formulation allows for flexibility in exploring variations of the attention mechanism, as discussed in \cite{ormaniec2024attentionhessian}.
+
+The output $F(X)$ is then fed into a loss function $l : \mathbb{R}^{L \times d} \times \mathbb{R}^{L \times d} \to \mathbb{R}$, which measures the discrepancy between the predicted sequence $F(X)$ and the target sequence $Y$. For simplicity, we assume a mean squared error loss, defined as:
+\[
+l(F(X), Y) = \frac{1}{L d} \| F(X) - Y \|_F^2,
+\]
+where $\| \cdot \|_F$ denotes the Frobenius norm of a matrix. This loss corresponds to the per-sample loss $l_i(\omega)$ in our general notation, where $\omega$ includes the parameters $\{W_Q, W_K, W_V\}$ of the self-attention layer.
+
+\subsection{Hessian Analysis for Self-Attention Layers}
+Our goal is to analyze the Hessian $\mathcal{H}_k(\omega)$ of the empirical loss $\mathcal{L}_k(\omega)$ with respect to the parameters $\omega = \{W_i\}$ of the self-attention layer, where $W_i \in \mathbb{R}^{p_i \times q_i}$ (e.g., $i \in \{Q, K, V\}$ for the query, key, and value weights). Following \cite{ormaniec2024attentionhessian}, the Hessian can be decomposed into blocks $\frac{\partial^2 (\mathcal{L}_k \circ F)}{\partial W_i \partial W_j}$, reflecting the interactions between different parameter matrices. This decomposition is crucial for understanding how the loss landscape evolves as the dataset size $k$ increases.
+
+To facilitate this analysis, we leverage the Gauss-Newton decomposition of the Hessian, a standard technique in neural network analysis \cite{ormaniec2024attentionhessian}. For the composite function $\mathcal{L}_k \circ F$, the Hessian block with respect to parameters $W_i$ and $W_j$ can be expressed as:
+\[
+\frac{\partial^2 (\mathcal{L}_k \circ F)}{\partial W_i \partial W_j} = \left( \frac{\partial F}{\partial W_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \left( \frac{\partial F}{\partial W_j} \right) + \left( \frac{\partial \mathcal{L}_k}{\partial F} \otimes I_{p_i q_i} \right) \frac{\partial^2 F}{\partial W_i \partial W_j},
+\]
+where the first term is the outer product Hessian (often related to the Gauss-Newton approximation) and the second term is the functional Hessian, capturing higher-order dependencies in the self-attention mechanism. This decomposition, detailed in \cite{ormaniec2024attentionhessian}, allows us to isolate the contributions of the self-attention matrix $A(X)$ and the value transformation $X W_V$ to the curvature of the loss landscape.
+
+In the context of our study, this Hessian analysis is critical for understanding how $\mathcal{H}_k(\omega)$ changes as new samples are added to the dataset, affecting the weighted difference $\Delta_k$. Specifically, the spectral properties of $\mathcal{H}_k(\omega)$, such as its eigenvalues, provide insights into the flatness or sharpness of the loss landscape.
 
 \section{Method}\label{sec:method}
 
