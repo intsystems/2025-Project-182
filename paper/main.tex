@@ -263,9 +263,197 @@ In the context of our study, this Hessian analysis is critical for understanding
 
 \section{Method}\label{sec:method}
 
+In this section, we derive generalized Hessian expressions for the self-attention layer and extend them to a full transformer block, leveraging these to analyze the convergence of the loss function surface as the dataset size increases. Our approach builds on the theoretical framework of \cite{ormaniec2024attentionhessian}, adapting and generalizing their results to provide insights into the sufficient dataset size \( k^* \) for transformer architectures.
+
+\subsection{Hessian of the Self-Attention Layer}\label{subsec:hessian_self_attention}
+
+We begin by analyzing the Hessian of a single self-attention layer with parameters \( \omega = \{W_Q, W_K, W_V\} \), where \( W_Q, W_K \in \mathbb{R}^{d \times d_K} \) are the query and key weight matrices, and \( W_V \in \mathbb{R}^{d \times d} \) is the value weight matrix. The input is a sequence of token embeddings \( X \in \mathbb{R}^{L \times d} \), where \( L \) is the sequence length and \( d \) is the embedding dimension. The output of the self-attention layer is:
+\[
+F(X) = A(X) X W_V,
+\]
+where \( A(X) = \text{softmax}\left( \frac{X W_Q W_K^\top X^\top}{\sqrt{d_K}} \right) \), and \( d_K \) is the key dimension. The empirical loss is defined as:
+\[
+\mathcal{L}_k(\omega) = \frac{1}{k} \sum_{i=1}^k l(F(X_i), Y_i),
+\]
+where \( l(F(X_i), Y_i) \) is a general loss function, not specified here to maintain generality (unlike the mean squared error used in \cite{ormaniec2024attentionhessian}).
+
+The Hessian of \( \mathcal{L}_k \) with respect to the parameters \( \omega \) is:
+\[
+\mathcal{H}_k(\omega) = \nabla^2_\omega \mathcal{L}_k(\omega) = \frac{1}{k} \sum_{i=1}^k \nabla^2_\omega l_i(\omega),
+\]
+where \( l_i(\omega) = l(F(X_i), Y_i) \). For parameters \( W_i, W_j \in \{W_Q, W_K, W_V\} \), the Hessian block is decomposed using the Gauss-Newton approximation:
+\[
+\frac{\partial^2 \mathcal{L}_k}{\partial W_i \partial W_j} = H_o(W_i, W_j) + H_f(W_i, W_j),
+\]
+with \( H_o \) as the outer-product Hessian and \( H_f \) as the functional Hessian.
+
+\subsubsection{Generalized Outer-Product Hessian \( H_o \)}
+The outer-product Hessian captures the second-order effects of the loss with respect to the output \( F \):
+\[
+H_o(W_i, W_j) = \left( \frac{\partial F}{\partial W_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \left( \frac{\partial F}{\partial W_j} \right),
+\]
+where \( \frac{\partial F}{\partial W_i} \) is the Jacobian of \( F \) with respect to \( W_i \), and \( \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \in \mathbb{R}^{L \times d \times L \times d} \) is the Hessian of the loss with respect to \( F \), averaged over \( k \) samples. We compute the Jacobians for all parameters:
+
+- \textbf{For \( W_V \):}
+\[
+\frac{\partial F}{\partial W_V} = A(X) X \otimes I_d,
+\]
+since \( A(X) \) is independent of \( W_V \), and the derivative is a tensor in \( \mathbb{R}^{L \times d \times d \times d} \).
+
+- \textbf{For \( W_Q \):}
+Let \( T(X) = \frac{X W_Q W_K^\top X^\top}{\sqrt{d_K}} \), so \( A(X) = \text{softmax}(T(X)) \). Then:
+\[
+\frac{\partial F}{\partial W_Q} = \frac{\partial A}{\partial T} \frac{\partial T}{\partial W_Q} X W_V.
+\]
+The derivative \( \frac{\partial T}{\partial W_Q} = \frac{1}{\sqrt{d_K}} X \otimes (X W_K) \), and \( \frac{\partial A}{\partial T} \) is the Jacobian of the softmax, a fourth-order tensor. Thus:
+\[
+\frac{\partial F}{\partial W_Q} = \frac{1}{\sqrt{d_K}} \frac{\partial A}{\partial T} (X \otimes X W_K) X W_V.
+\]
+
+- \textbf{For \( W_K \):}
+Similarly:
+\[
+\frac{\partial T}{\partial W_K} = \frac{1}{\sqrt{d_K}} (X W_Q) \otimes X,
+\]
+so:
+\[
+\frac{\partial F}{\partial W_K} = \frac{1}{\sqrt{d_K}} \frac{\partial A}{\partial T} (X W_Q \otimes X) X W_V.
+\]
+
+For each pair \( (W_i, W_j) \), \( H_o \) is computed by contracting the Jacobians with \( \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \). For example:
+- \( H_o(W_Q, W_K) = \frac{1}{d_K} \left( (X \otimes X W_K)^\top \frac{\partial A^\top}{\partial T} X W_V \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \left( \frac{\partial A}{\partial T} (X W_Q \otimes X) X W_V \right) \).
+
+The full set of expressions follows this pattern, remaining general without specifying \( \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \).
+
+\subsubsection{Generalized Functional Hessian \( H_f \)}
+The functional Hessian accounts for the curvature of \( F \):
+\[
+H_f(W_i, W_j) = \left( \frac{\partial \mathcal{L}_k}{\partial F} \otimes I_{p_i q_i} \right) \frac{\partial^2 F}{\partial W_i \partial W_j},
+\]
+where \( \frac{\partial \mathcal{L}_k}{\partial F} \in \mathbb{R}^{L \times d} \) is the gradient of the loss with respect to \( F \), and \( p_i q_i \) is the size of \( W_i \) (e.g., \( d d_K \) for \( W_Q \)). The second derivative \( \frac{\partial^2 F}{\partial W_i \partial W_j} \) varies by pair:
+
+- \textbf{\( H_f(W_V, W_V) \):} Since \( F = A X W_V \) is linear in \( W_V \), \( \frac{\partial^2 F}{\partial W_V \partial W_V} = 0 \), so \( H_f(W_V, W_V) = 0 \).
+- \textbf{\( H_f(W_Q, W_K) \):} 
+\[
+\frac{\partial^2 F}{\partial W_Q \partial W_K} = \frac{1}{d_K} \frac{\partial^2 A}{\partial T^2} \left( (X \otimes X W_K) \otimes (X W_Q \otimes X) \right) X W_V + \frac{1}{\sqrt{d_K}} \frac{\partial A}{\partial T} (X \otimes X),
+\]
+\[
+H_f(W_Q, W_K) = \frac{1}{d_K} \left( \frac{\partial \mathcal{L}_k}{\partial F} \otimes I_{d d_K} \right) \left( \frac{\partial^2 A}{\partial T^2} \left( (X \otimes X W_K) \otimes (X W_Q \otimes X) \right) X W_V + \sqrt{d_K} \frac{\partial A}{\partial T} (X \otimes X) \right).
+\]
+
+Other pairs follow similarly, with \( H_f \) non-zero when \( W_i \) and \( W_j \) both influence \( A(X) \).
+
+\subsection{Hessian of the Transformer Block}\label{subsec:hessian_transformer_block}
+
+A transformer block extends the self-attention layer with a feed-forward network (FFN), residual connections, and layer normalization. The output is:
+\[
+Y = \text{LayerNorm}(X + \text{SelfAttention}(X)),
+\]
+\[
+Z = \text{LayerNorm}(Y + \text{FFN}(Y)),
+\]
+where \( \text{FFN}(Y) = \sigma(Y W_1 + b_1) W_2 + b_2 \), with \( W_1 \in \mathbb{R}^{d \times d_{\text{ff}}} \), \( W_2 \in \mathbb{R}^{d_{\text{ff}} \times d} \), \( b_1 \in \mathbb{R}^{d_{\text{ff}}} \), \( b_2 \in \mathbb{R}^{d} \), and \( \sigma \) as the activation (e.g., ReLU). The parameters are \( \omega = \{W_Q, W_K, W_V, W_1, W_2, b_1, b_2\} \), assuming fixed layer normalization parameters for simplicity.
+
+\begin{theorem}\label{thm:transformer_hessian}
+
+NEED TO BE COMPLETED TODO
+
+For a transformer block with parameters \( \omega \), the Hessian of the loss \( \mathcal{L}_k \) with respect to parameters \( \omega_i, \omega_j \in \omega \) is:
+\[
+\mathcal{H}_k = H_o + H_f,
+\]
+where:
+\[
+H_o(\omega_i, \omega_j) = \left( \frac{\partial Z}{\partial \omega_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial Z^2} \left( \frac{\partial Z}{\partial \omega_j} \right),
+\]
+\[
+H_f(\omega_i, \omega_j) = \left( \frac{\partial \mathcal{L}_k}{\partial Z} \otimes I_{p_i q_i} \right) \frac{\partial^2 Z}{\partial \omega_i \partial \omega_j}.
+\]
+\end{theorem}
+
+The Jacobians \( \frac{\partial Z}{\partial \omega_i} \) are computed via the chain rule through the layers, incorporating derivatives from both the self-attention and FFN components, adjusted for layer normalization. The proof is provided in Appendix~\ref{app:proof_transformer_hessian}.
+
+\subsection{Convergence of the Loss Function Surface}\label{subsec:loss_convergence}
+
+AS IN THE PAPER (NEED REFERENCES)
+
+We apply the Hessian expressions to estimate the convergence of the loss difference \( \Delta_k = \int ( \mathcal{L}_k(\omega) - \mathcal{L}_{k-1}(\omega) )^2 p(\omega) d\omega \). The loss difference is:
+\[
+\mathcal{L}_{k+1}(\omega) - \mathcal{L}_k(\omega) = \frac{1}{k+1} \left( l_{k+1}(\omega) - \mathcal{L}_k(\omega) \right).
+\]
+Using a second-order Taylor expansion around a local minimum \( \omega^* \) (where \( \nabla \mathcal{L}_k(\omega^*) = 0 \)):
+\[
+\mathcal{L}_k(\omega) \approx \mathcal{L}_k(\omega^*) + \frac{1}{2} (\omega - \omega^*)^\top \mathcal{H}_k(\omega^*) (\omega - \omega^*),
+\]
+\[
+\mathcal{L}_{k+1}(\omega) - \mathcal{L}_k(\omega) \approx \frac{1}{2} (\omega - \omega^*)^\top ( \mathcal{H}_{k+1}(\omega^*) - \mathcal{H}_k(\omega^*) ) (\omega - \omega^*).
+\]
+Thus:
+\[
+\Delta_{k+1} \approx \mathbb{E}_{p(\omega)} \left[ \left( \frac{1}{2} (\omega - \omega^*)^\top ( \mathcal{H}_{k+1}(\omega^*) - \mathcal{H}_k(\omega^*) ) (\omega - \omega^*) \right)^2 \right].
+\]
+Substituting \( \mathcal{H}_k = H_o^{(k)} + H_f^{(k)} \) from Theorem~\ref{thm:transformer_hessian}:
+\[
+\mathcal{H}_{k+1} - \mathcal{H}_k = ( H_o^{(k+1)} - H_o^{(k)} ) + ( H_f^{(k+1)} - H_f^{(k)} ),
+\]
+where:
+\[
+H_o^{(k)} = \frac{1}{k} \sum_{i=1}^k \left( \frac{\partial Z_i}{\partial \omega} \right)^\top \frac{\partial^2 l_i}{\partial Z_i^2} \left( \frac{\partial Z_i}{\partial \omega} \right),
+\]
+\[
+H_f^{(k)} = \frac{1}{k} \sum_{i=1}^k \left( \frac{\partial l_i}{\partial Z_i} \otimes I \right) \frac{\partial^2 Z_i}{\partial \omega \partial \omega}.
+\]
+As \( k \) increases, the difference \( \mathcal{H}_{k+1} - \mathcal{H}_k \) diminishes due to averaging, leading to \( \Delta_k \to 0 \). The rate of convergence depends on the spectral properties of \( H_o \) and \( H_f \), reflecting the transformer block’s architecture and the loss function’s curvature.
+
 \section{Experiments}\label{sec:exp}
 
-To verify the theoretical estimates obtained, we conducted a detailed empirical study...
+To verify the theoretical estimates obtained, we conducted a detailed empirical study. The experiments are divided into two main parts: the base experiment, which demonstrates the general behavior of the loss function convergence, and the transformer-specific experiment, which focuses on the Vision Transformer (ViT) architecture. Both experiments aim to validate the theoretical results and provide insights into the practical implications of our findings.
+
+\subsection{Base Experiment}
+
+The goal of the base experiment is to empirically observe the convergence of the loss function as the dataset size increases. Specifically, we aim to verify whether the difference between the loss functions for consecutive dataset sizes, $|\cL_{k + 1}(\theta) - \cL_{k}(\theta)|$
+decreases as $k$ grows, as predicted by our theoretical analysis.
+
+We consider a simple neural network architecture, such as a fully connected network, trained on a synthetic dataset. The dataset is generated from a known distribution to ensure control over the data generation process. The loss function used is the mean squared error (MSE), and the network is trained using stochastic gradient descent (SGD).
+
+The results of the base experiment are presented in Figure~\ref{fig:base_experiment}. The plot shows the convergence of $|\cL_{k + 1}(\theta) - \cL_{k}(\theta)|$ as a function of the dataset size $k$. As expected, the difference decreases monotonically, indicating that the loss function surface stabilizes as the dataset size increases. This behavior aligns with our theoretical predictions, confirming that the loss function converges as the dataset grows.
+
+\begin{figure}[h]
+\centering
+\begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\linewidth]{figures/mnist_hidden_size.pdf}
+    \caption{}
+    \label{fig:base_mnist_hidden_size}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\linewidth]{figures/mnist_num_layers.pdf}
+    \caption{}
+    \label{fig:base_mnist_num_layers}
+\end{subfigure}
+\caption{Convergence of the loss function difference 
+$|\cL_{k + 1}(\theta) - \cL_{k}(\theta)|$ as a function of the dataset size $k$. 
+The plots demonstrates the stabilization of the loss function surface as the dataset size increases.}
+\label{fig:base_experiment}
+\end{figure}
+\subsection{Transformer-Specific Experiment}
+
+In this experiment, we focus on the Vision Transformer (ViT) architecture to validate our theoretical results in a more complex and practical setting. The goal is to observe the convergence of the loss function and the quality of classification as the dataset size increases, using a pre-trained ViT model fine-tuned on a small dataset.
+
+We use a pre-trained Vision Transformer model from HuggingFace's transformers library. The model is fine-tuned on a small dataset of images, such as anime characters, cats, or dogs. The fine-tuning process is conducted in two ways:
+\begin{enumerate}
+\item \textbf{LoRA (Low-Rank Adaptation)}: We apply parameter-efficient fine-tuning using LoRA, which allows us to adapt the model with minimal changes to the original parameters.
+\item \textbf{Unfreezing the Last Layers}: We unfreeze the last few layers of the model and attach a classification head, allowing the model to adapt to the specific classification task.
+\end{enumerate}
+
+The loss function used is the cross-entropy loss, and the model is trained using the Adam optimizer. We monitor both the classification accuracy and the convergence of the loss function as the dataset size increases.
+
+The results of the transformer-specific experiment will be presented in two parts:
+\begin{enumerate}
+\item \textbf{Classification Accuracy}: We will report the classification accuracy on a validation set as a function of the dataset size. This will demonstrate how the model's performance improves with more data.
+\item \textbf{Loss Function Convergence}: We will plot the difference 
+$|\cL_{k + 1}(\theta) - \cL_{k}(\theta)|$ as a function of the dataset size $k$, similar to the base experiment. This will show how the loss function surface stabilizes as the dataset size increases.
+\end{enumerate}
 
 \section{Discussion}\label{sec:disc}
 
@@ -285,10 +473,38 @@ TODO
 
 \newpage
 \appendix
-\section{Appendix / supplemental material}\label{app}
+\section{Appendix / supplemental material}\label{app:A}
 
-\subsection{Additional experiments / Proofs of Theorems}\label{app:exp}
+\subsection{Additional experiments}\label{app:exp}
 
 TODO
+
+
+\section{Appendix / Proofs of the Theorems}\label{app:B}
+\subsection{Proof of Theorem~\ref{thm:transformer_hessian}}\label{app:proof_transformer_hessian}
+NEED TO BE COMPLETED TODO
+\begin{proof}
+Consider the transformer block output \( Z = \text{LayerNorm}(Y + \text{FFN}(Y)) \), where \( Y = \text{LayerNorm}(X + \text{SelfAttention}(X)) \), and the empirical loss \( \mathcal{L}_k(\omega) = \frac{1}{k} \sum_{i=1}^k l(Z_i, Y_i) \). The Hessian is:
+\[
+\mathcal{H}_k(\omega) = \nabla^2_\omega \mathcal{L}_k(\omega) = \frac{1}{k} \sum_{i=1}^k \nabla^2_\omega l_i(\omega).
+\]
+For parameters \( \omega_i, \omega_j \in \omega \), apply the chain rule to the composite function \( \mathcal{L}_k \circ Z \):
+\[
+\frac{\partial^2 \mathcal{L}_k}{\partial \omega_i \partial \omega_j} = \frac{\partial}{\partial \omega_i} \left( \left( \frac{\partial Z}{\partial \omega_j} \right)^\top \frac{\partial \mathcal{L}_k}{\partial Z} \right).
+\]
+Using the product rule:
+\[
+\frac{\partial^2 \mathcal{L}_k}{\partial \omega_i \partial \omega_j} = \left( \frac{\partial Z}{\partial \omega_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial Z^2} \left( \frac{\partial Z}{\partial \omega_j} \right) + \left( \frac{\partial \mathcal{L}_k}{\partial Z} \otimes I_{p_i q_i} \right) \frac{\partial^2 Z}{\partial \omega_i \partial \omega_j}.
+\]
+- \textbf{Outer-Product Term:} TODO The first term, \( H_o \), arises from the derivative of the loss with respect to \( Z \), requiring the Jacobians \( \frac{\partial Z}{\partial \omega_i} \), computed via:
+\[
+\frac{\partial Z}{\partial \omega_i} = \frac{\partial \text{LayerNorm}}{\partial (Y + \text{FFN}(Y))} \left( \frac{\partial Y}{\partial \omega_i} + \frac{\partial \text{FFN}}{\partial Y} \frac{\partial Y}{\partial \omega_i} \right),
+\]
+where \( \frac{\partial Y}{\partial \omega_i} \) involves the self-attention derivatives adjusted for layer normalization.
+
+- \textbf{Functional Term:} TODO The second term, \( H_f \), involves the second derivative of \( Z \), which is non-zero for pairs affecting intermediate layers (e.g., \( W_Q \) and \( W_K \)) and zero when \( Z \) is linear in a parameter (e.g., \( W_2 \)).
+
+This decomposition holds for all parameter pairs, completing the proof.
+\end{proof}
 
 \end{document}
