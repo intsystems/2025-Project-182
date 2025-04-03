@@ -138,7 +138,7 @@ datasets. The obtained plots substantiate the validity of the theoretical calcul
         a sufficient dataset size can reduce computation time.
 \end{itemize}
 
-\textbf{Outline.} TODO REFERENCES The rest of the paper is organized as follows. In Section 2, we review related work, categorizing existing research into key topics and highlighting their main contributions. Section 3 introduces the notation and presents preliminary calculations essential for our analysis. In Section 4, we derive theoretical bounds for the norm of the Hessian matrix and the norm of the difference between loss functions. Section 5 provides an empirical study validating these theoretical results. Sections 6 and 7 discuss and summarize our findings, offering insights and conclusions. Additional experiments and proofs of theorems are included in Appendix A.
+\textbf{Outline.} The rest of the paper is organized as follows. In Section  \ref{sec:rw}, we review related work, categorizing existing research into key topics and highlighting their main contributions. Section \ref{sec:prelim} introduces the notation and presents preliminary calculations essential for our analysis. In Section \ref{sec:method}, we derive theoretical bounds for the norm of the Hessian matrix and the norm of the difference between loss functions. Section \ref{sec:exp} provides an empirical study validating these theoretical results. Sections \ref{sec:disc} and \ref{sec:concl} discuss and summarize our findings, offering insights and conclusions. Additional experiments and proofs of theorems are included in Appendix \ref{app:A}.
 
 \section{Related Work}\label{sec:rw}
 
@@ -164,102 +164,78 @@ Dataset size’s impact on loss landscapes, particularly for transformers, is un
 
 In this section, we introduce the general notation used in the rest of the paper and the basic assumptions similar to \cite{} TODO ARTEM'S WORK.
 
-We consider a $K$-label classification problem.
-So, let's consider $p(y|x)$ a conditional probability, which maps unobserved variable $x \in \mathcal{X}$ to the corresponding
-output $y \in \mathcal{Y}$. We consider $\mathcal{Y}$ is a subspace (or same space) as $\mathbb{R}^K$. Let $f_{\omega}(\cdot)$
-be a neural network with a list of parameters $\omega$. Let $\Omega$ be a space of parameters ($\omega \in \Omega$).
+We consider $p(y|x)$ a conditional probability, which maps unobserved variable $x \in \mathcal{X}$ to the corresponding
+output $y \in \mathcal{Y}$. We consider $\mathcal{Y}$ is a subspace (or same space) as $\mathbb{R}^K$. Let $f_{\mathbf{w}}(\cdot)$
+be a neural network with a list of parameters $\omega$. Let $\Omega$ be a space of parameters ($\mathbf{w} \in \Omega$).
 
 Let
 $$\mathcal{D} = \left\{ (x_i, y_i) \, | \, i = 1, \dots, m \right\}$$
 be a given dataset of size $m$ consists of i.i.d.
-samples. Let $l(\cdot, \cdot)$ be a given loss function (e.g. cross-entrophy) where first argument refers to neural network's
-result and the second argument refers to the true answer. To simplify, define: $$l_i(\omega) := l(f_{\omega}(x_i), y_i).$$
+samples. Let $l(\cdot, \cdot)$ be a given twice differentiable loss function (e.g. cross-entrophy) where first argument refers to neural network's
+result and the second argument refers to the true answer. To simplify, define: $$l_i(\mathbf{w}) := l(f_{\mathbf{w}}(x_i), y_i).$$
 
 \begin{definition}
   The empirical loss function for the first $k$ elements is:
-  $$\mathcal{L}_k(\omega) = \frac1k \sum\limits_1^k l_i(\omega), \,\, \mathcal{L}(\omega) := \mathcal{L}_m(\omega).$$
+  $$\mathcal{L}_k(\mathbf{w}) = \frac1k \sum\limits_1^k l_i(\mathbf{w}), \,\, \mathcal{L}(\mathbf{w}) := \mathcal{L}_m(\mathbf{w}).$$
 \end{definition}
 
 Thus, the difference between losses for neighbouring samplem sizes is:
-$$\mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega) = \frac{l_{k}(\omega) - \mathcal{L}_{k-1}(\omega)}{k}.$$
+$$\mathcal{L}_{k}(\mathbf{w}) - \mathcal{L}_{k-1}(\mathbf{w}) = \frac{l_{k}(\mathbf{w}) - \mathcal{L}_{k-1}(\mathbf{w})}{k}.$$
 
 \begin{definition}
-  Let the Hessian of $\mathcal{L}_k(\omega)$ be:
-  $$\mathcal{H}_k(\omega) = \nabla^2_{\omega}\mathcal{L}_k(\omega) = \frac1k \sum\limits_1^k \nabla^2_{\omega} l_i(\omega).$$
+  The Hessian of \(\mathcal{L}_{k}(\mathbf{w})\) is:
+  \[
+  \mathbf{H}_k(\mathbf{w}) = \nabla^2_{\mathbf{w}} \mathcal{L}_{k}(\mathbf{w}) = \frac{1}{k} \sum_{i=1}^k \nabla^2_{\mathbf{w}} l_i(\mathbf{w}).
+  \]
 \end{definition}
 
-\begin{definition}
-  To calculate the overall loss landscape changing, one has to integrate the absolute difference for the entire parameter space.
-  We define \textbf{weighted difference} as:
-  $$\Delta_{k} = \int \left( \mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega) \right)^2 p(\omega) d\omega,$$
-  where $p(\omega)$ describes the priority of the particular parameter points so we can make $p(\omega)$ have higher values
-  next to the local minima.
-\end{definition}
-
-We firther investigate this difference and aimed at exploration of how adding a new object to the dataset changes the value.
-We interested in convergence of this value and properties of loss function when the training dataset size limits to $\infty$.
-
-
-\begin{definition}
-  Let $\Delta$ be a positive hyperparameter that indicates the stop-difference for $\Delta_k$. If
-  $$\Delta_{k^*} < \Delta \wedge \left( \forall k < k^*: \, \Delta_k \geq \Delta \right),$$
-  we can say that $k^*$ samples in the dataset are enough to describe the distribution of data from the general population.
-  We call $k^*$ as \textbf{sufficient}.
-\end{definition}
 
 \subsection{Assumptions}
 
 \begin{assumption}
-  Let $\omega^*$ be the local minimum of both $\mathcal{L}_{k-1}(\omega)$ and $\mathcal{L}_{k}(\omega)$.
-  Thus, $$\nabla \mathcal{L}_{k-1}(\omega^*) = \nabla \mathcal{L}_{k}(\omega^*) = 0.$$
+  Let $\mathbf{w}^*$ be the local minimum of both $\mathcal{L}_{k-1}(\mathbf{w})$ and $\mathcal{L}_{k}(\mathbf{w})$.
+  Thus, $$\nabla \mathcal{L}_{k-1}(\mathbf{w}^*) = \nabla \mathcal{L}_{k}(\mathbf{w}^*) = 0.$$
 \end{assumption}
 
 This assumption allows us to explore the behavior and the geometry of the loss function landscape at only one point.
 
-Furthermore, using second-order Taylor's approximation for $\mathcal{L}_{k}(\omega)$ at $\omega^*$ we get:
-$$\mathcal{L}_{k}(\omega) \approx \mathcal{L}_{k}(\omega^*) + \frac12 (\omega - \omega^*)^T \mathcal{H}_k(\omega^*)
-  (\omega - \omega^*)$$
-
-\begin{assumption}
-  We can assume parameters w to be random, which will lead to quite natural condition: p(w) can be even a prior
-  distribution of w, so: $$\Delta_{k} = \mathbb{E}_{p(\omega)} \left( \mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega)
-    \right)^2 = \mathbb{D} \left( \mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega) \right) + \left( \mathbb{E} \left(
-      \mathcal{L}_{k}(\omega) - \mathcal{L}_{k-1}(\omega) \right) \right)^2$$
-\end{assumption}
+Furthermore, using second-order Taylor's approximation for $\mathcal{L}_{k}(\omega)$ at $\mathbf{w}^*$ we get:
+$$\mathcal{L}_{k}(\mathbf{w}) \approx \mathcal{L}_{k}(\mathbf{w}^*) + \frac12 (\mathbf{w} - \mathbf{w}^*)^T \mathcal{H}_k(\mathbf{w}^*)
+  (\mathbf{w} - \mathbf{w}^*)$$
 
 \subsection{Transformers and Self-Attention Layers}
 To apply the above concepts to transformer architectures, we define the operation of a single self-attention layer, following a generalized approach similar to \cite{ormaniec2024attentionhessian}, which builds on the foundational transformer framework of \cite{vaswani2017attention}. This definition will enable us to analyze the Hessian's structure and its implications for loss landscape convergence as the dataset size increases.
 
-Consider a sequence of token embeddings $X \in \mathbb{R}^{L \times d}$, where $L$ is the sequence length and $d$ is the embedding dimension. A self-attention layer maps $X$ to an output sequence $F(X) \in \mathbb{R}^{L \times d}$ via the following operation:
+Consider a sequence of token embeddings $\mathbf{X} \in \mathbb{R}^{L \times d}$, where $L$ is the sequence length and $d$ is the embedding dimension. A self-attention layer maps $\mathbf{X}$ to an output sequence $\mathbf{F}(\mathbf{X}) \in \mathbb{R}^{L \times d}$ via the following operation:
 \[
-F(X) = A(X) X W_V,
+\mathbf{F}(\mathbf{X}) = \mathbf{A}(\mathbf{X}) \mathbf{X} \mathbf{W}_V,
 \]
-where $W_V \in \mathbb{R}^{d \times d}$ is the value weight matrix, and $A(X) \in \mathbb{R}^{L \times L}$ is the self-attention matrix, defined as:
+where $\mathbf{W}_V \in \mathbb{R}^{d \times d}$ is the value weight matrix, and $\mathbf{A}(\mathbf{X}) \in \mathbb{R}^{L \times L}$ is the self-attention matrix, defined as:
 \[
-A(X) = a(T(X)).
+\mathbf{A}(\mathbf{X}) = a(\mathbf{T}(\mathbf{X})),
 \]
-Here, $T(X) \in \mathbb{R}^{L \times L}$ is the query-key similarity transformation, and $a : \mathbb{R}^{L \times L} \to \mathbb{R}^{L \times L}$ is an activation function. In the classical self-attention mechanism \cite{vaswani2017attention}, the similarity transformation is given by:
+Here, $\mathbf{T}(\mathbf{X}) \in \mathbb{R}^{L \times L}$ is the query-key similarity transformation, and $a : \mathbb{R}^{L \times L} \to \mathbb{R}^{L \times L}$ is an activation function. In the classical self-attention mechanism \cite{vaswani2017attention}, the similarity transformation is given by:
 \[
-T(X) = \frac{X W_Q W_K^\top X^\top}{\sqrt{d_K}},
+\mathbf{T}(\mathbf{X}) = \frac{\mathbf{X} \mathbf{W}_Q \mathbf{W}_K^\top \mathbf{X}^\top}{\sqrt{d_K}},
 \]
-where $W_Q, W_K \in \mathbb{R}^{d \times d_K}$ are the query and key weight matrices, respectively, $d_K$ is the key dimension, and $a = \text{softmax}$ (applied row-wise). This formulation allows for flexibility in exploring variations of the attention mechanism, as discussed in \cite{ormaniec2024attentionhessian}.
+where $\mathbf{W}_Q \mathbf{W}_K \in \mathbb{R}^{d \times d_K}$ are the query and key weight matrices, respectively, $d_K$ is the key dimension, and $a = \text{softmax}$ (applied row-wise). This formulation allows for flexibility in exploring variations of the attention mechanism, as discussed in \cite{ormaniec2024attentionhessian}.
 
-The output $F(X)$ is then fed into a loss function $l : \mathbb{R}^{L \times d} \times \mathbb{R}^{L \times d} \to \mathbb{R}$, which measures the discrepancy between the predicted sequence $F(X)$ and the target sequence $Y$. For simplicity, we assume a mean squared error loss, defined as:
+The output $\mathbf{F}(\mathbf{X})$ is then fed into a loss function $l : \mathbb{R}^{L \times d} \times \mathbb{R}^{L \times d} \to \mathbb{R}$, which measures the discrepancy between the predicted sequence $\mathbf{F}(\mathbf{X})$ and the target sequence $\mathbf{Y}$. For simplicity, we assume a mean squared error loss, defined as:
 \[
-l(F(X), Y) = \frac{1}{L d} \| F(X) - Y \|_F^2,
+l(\mathbf{F}(\mathbf{X}), \mathbf{Y}) = \frac{1}{L d} \|\mathbf{F}(\mathbf{X}) - \mathbf{Y}\|_F^2,,
 \]
-where $\| \cdot \|_F$ denotes the Frobenius norm of a matrix. This loss corresponds to the per-sample loss $l_i(\omega)$ in our general notation, where $\omega$ includes the parameters $\{W_Q, W_K, W_V\}$ of the self-attention layer.
+where $\| \cdot \|_F$ denotes the Frobenius norm of a matrix. This loss corresponds to the per-sample loss $l_i(\mathbf{w})$ in our general notation, where $\omega$ includes the parameters $\{\mathbf{W}_Q, \mathbf{W}_K, \mathbf{W}_V\}$ of the self-attention layer.
 
 \subsection{Hessian Analysis for Self-Attention Layers}
-Our goal is to analyze the Hessian $\mathcal{H}_k(\omega)$ of the empirical loss $\mathcal{L}_k(\omega)$ with respect to the parameters $\omega = \{W_i\}$ of the self-attention layer, where $W_i \in \mathbb{R}^{p_i \times q_i}$ (e.g., $i \in \{Q, K, V\}$ for the query, key, and value weights). Following \cite{ormaniec2024attentionhessian}, the Hessian can be decomposed into blocks $\frac{\partial^2 (\mathcal{L}_k \circ F)}{\partial W_i \partial W_j}$, reflecting the interactions between different parameter matrices. This decomposition is crucial for understanding how the loss landscape evolves as the dataset size $k$ increases.
+Our goal is to analyze the Hessian $\mathbf{H}_k(\mathbf{w})$ of the empirical loss $\mathcal{L}_k(\mathbf{w})$ with respect to the parameters $\mathbf{w} = \{\mathbf{W}_i\}$ of the self-attention layer, where $\mathbf{W}_i \in \mathbb{R}^{p_i \times q_i}$ (e.g., $i \in \{Q, K, V\}$ for the query, key, and value weights). Following \cite{ormaniec2024attentionhessian}, the Hessian can be decomposed into blocks $\frac{\partial^2 (\mathcal{L}_k \circ \mathbf{F})}{\partial \mathbf{W}_i \partial \mathbf{W}_j}$, reflecting the interactions between different parameter matrices. This decomposition is crucial for understanding how the loss landscape evolves as the dataset size $k$ increases.
 
-To facilitate this analysis, we leverage the Gauss-Newton decomposition of the Hessian, a standard technique in neural network analysis \cite{ormaniec2024attentionhessian}. For the composite function $\mathcal{L}_k \circ F$, the Hessian block with respect to parameters $W_i$ and $W_j$ can be expressed as:
+To facilitate this analysis, we leverage the Gauss-Newton decomposition of the Hessian, a standard technique in neural network analysis \cite{ormaniec2024attentionhessian}. For the composite function $\mathcal{L}_k \circ \mathbf{F}$, the Hessian block with respect to parameters $\mathbf{W}_i$ and $\mathbf{W}_j$ can be expressed as:
 \[
-\frac{\partial^2 (\mathcal{L}_k \circ F)}{\partial W_i \partial W_j} = \left( \frac{\partial F}{\partial W_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \left( \frac{\partial F}{\partial W_j} \right) + \left( \frac{\partial \mathcal{L}_k}{\partial F} \otimes I_{p_i q_i} \right) \frac{\partial^2 F}{\partial W_i \partial W_j},
+\frac{\partial^2 (\mathcal{L}_k \circ \mathbf{F})}{\partial \mathbf{W}_i \partial \mathbf{W}_j} = \left( \frac{\partial \mathbf{F}}{\partial \mathbf{W}_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{F}^2} \left( \frac{\partial \mathbf{F}}{\partial \mathbf{W}_j} \right) + \left( \frac{\partial \mathcal{L}_k}{\partial \mathbf{F}} \otimes I_{p_i q_i} \right) \frac{\partial^2 \mathbf{F}}{\partial \mathbf{W}_i \partial \mathbf{W}_j},
 \]
-where the first term is the outer product Hessian (often related to the Gauss-Newton approximation) and the second term is the functional Hessian, capturing higher-order dependencies in the self-attention mechanism. This decomposition, detailed in \cite{ormaniec2024attentionhessian}, allows us to isolate the contributions of the self-attention matrix $A(X)$ and the value transformation $X W_V$ to the curvature of the loss landscape.
+where the first term is the outer product Hessian (often related to the Gauss-Newton approximation) and the second term is the functional Hessian, capturing higher-order dependencies in the self-attention mechanism. This decomposition, detailed in \cite{ormaniec2024attentionhessian}, allows us to isolate the contributions of the self-attention matrix $\mathbf{A}(\mathbf{X})$ and the value transformation $\mathbf{X} \mathbf{W}_V$ to the curvature of the loss landscape.
 
-In the context of our study, this Hessian analysis is critical for understanding how $\mathcal{H}_k(\omega)$ changes as new samples are added to the dataset, affecting the weighted difference $\Delta_k$. Specifically, the spectral properties of $\mathcal{H}_k(\omega)$, such as its eigenvalues, provide insights into the flatness or sharpness of the loss landscape.
+In the context of our study, this Hessian analysis is critical for understanding how $\mathbf{H}_k(\mathbf{w})$ changes as new samples are added to the dataset.
 
 \section{Method}\label{sec:method}
 
@@ -267,143 +243,155 @@ In this section, we derive generalized Hessian expressions for the self-attentio
 
 \subsection{Hessian of the Self-Attention Layer}\label{subsec:hessian_self_attention}
 
-We begin by analyzing the Hessian of a single self-attention layer with parameters \( \omega = \{W_Q, W_K, W_V\} \), where \( W_Q, W_K \in \mathbb{R}^{d \times d_K} \) are the query and key weight matrices, and \( W_V \in \mathbb{R}^{d \times d} \) is the value weight matrix. The input is a sequence of token embeddings \( X \in \mathbb{R}^{L \times d} \), where \( L \) is the sequence length and \( d \) is the embedding dimension. The output of the self-attention layer is:
+We begin by analyzing the Hessian of a single self-attention layer with parameters \(\mathbf{w} = \{\mathbf{W}_Q, \mathbf{W}_K, \mathbf{W}_V\}\), where \(\mathbf{W}_Q, \mathbf{W}_K \in \mathbb{R}^{d \times d_K}\) are the query and key weight matrices, and \(\mathbf{W}_V \in \mathbb{R}^{d \times d}\) is the value weight matrix. The input is a sequence of token embeddings \(\mathbf{X} \in \mathbb{R}^{L \times d}\), where \(L\) is the sequence length and \(d\) is the embedding dimension. The output of the self-attention layer is:
 \[
-F(X) = A(X) X W_V,
+\mathbf{F}(\mathbf{X}) = \mathbf{A}(\mathbf{X}) \mathbf{X} \mathbf{W}_V,
 \]
-where \( A(X) = \text{softmax}\left( \frac{X W_Q W_K^\top X^\top}{\sqrt{d_K}} \right) \), and \( d_K \) is the key dimension. The empirical loss is defined as:
+where \(\mathbf{A}(\mathbf{X}) = \text{softmax}\left( \frac{\mathbf{X} \mathbf{W}_Q \mathbf{W}_K^\top \mathbf{X}^\top}{\sqrt{d_K}} \right)\), and \(d_K\) is the key dimension. The empirical loss is defined as:
 \[
-\mathcal{L}_k(\omega) = \frac{1}{k} \sum_{i=1}^k l(F(X_i), Y_i),
+\mathcal{L}_k(\mathbf{w}) = \frac{1}{k} \sum_{i=1}^k l(\mathbf{F}(\mathbf{X}_i), \mathbf{Y}_i),
 \]
-where \( l(F(X_i), Y_i) \) is a general loss function, not specified here to maintain generality (unlike the mean squared error used in \cite{ormaniec2024attentionhessian}).
+where \(l(\mathbf{F}(\mathbf{X}_i), \mathbf{Y}_i)\) is a general loss function, not specified here to maintain generality (unlike the mean squared error used in \cite{ormaniec2024attentionhessian}).
 
-The Hessian of \( \mathcal{L}_k \) with respect to the parameters \( \omega \) is:
+The Hessian of \(\mathcal{L}_k\) with respect to the parameters \(\mathbf{w}\) is:
 \[
-\mathcal{H}_k(\omega) = \nabla^2_\omega \mathcal{L}_k(\omega) = \frac{1}{k} \sum_{i=1}^k \nabla^2_\omega l_i(\omega),
+\mathbf{H}_k(\mathbf{w}) = \nabla^2_{\mathbf{w}} \mathcal{L}_k(\mathbf{w}) = \frac{1}{k} \sum_{i=1}^k \nabla^2_{\mathbf{w}} l_i(\mathbf{w}),
 \]
-where \( l_i(\omega) = l(F(X_i), Y_i) \). For parameters \( W_i, W_j \in \{W_Q, W_K, W_V\} \), the Hessian block is decomposed using the Gauss-Newton approximation:
+where \(l_i(\mathbf{w}) = l(\mathbf{F}(\mathbf{X}_i), \mathbf{Y}_i)\). For parameters \(\mathbf{W}_i, \mathbf{W}_j \in \{\mathbf{W}_Q, \mathbf{W}_K, \mathbf{W}_V\}\), the Hessian block is decomposed using the Gauss-Newton approximation:
 \[
-\frac{\partial^2 \mathcal{L}_k}{\partial W_i \partial W_j} = H_o(W_i, W_j) + H_f(W_i, W_j),
+\frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{W}_i \partial \mathbf{W}_j} = \mathbf{H}_o(\mathbf{W}_i, \mathbf{W}_j) + \mathbf{H}_f(\mathbf{W}_i, \mathbf{W}_j),
 \]
-with \( H_o \) as the outer-product Hessian and \( H_f \) as the functional Hessian.
+with \(\mathbf{H}_o\) as the outer-product Hessian and \(\mathbf{H}_f\) as the functional Hessian.
 
-\subsubsection{Generalized Outer-Product Hessian \( H_o \)}
-The outer-product Hessian captures the second-order effects of the loss with respect to the output \( F \):
+\subsubsection{Generalized Outer-Product Hessian \( \mathbf{H}_o \)}
+The outer-product Hessian captures the second-order effects of the loss with respect to the output \(\mathbf{F}\):
 \[
-H_o(W_i, W_j) = \left( \frac{\partial F}{\partial W_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \left( \frac{\partial F}{\partial W_j} \right),
+\mathbf{H}_o(\mathbf{W}_i, \mathbf{W}_j) = \left( \frac{\partial \mathbf{F}}{\partial \mathbf{W}_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{F}^2} \left( \frac{\partial \mathbf{F}}{\partial \mathbf{W}_j} \right),
 \]
-where \( \frac{\partial F}{\partial W_i} \) is the Jacobian of \( F \) with respect to \( W_i \), and \( \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \in \mathbb{R}^{L \times d \times L \times d} \) is the Hessian of the loss with respect to \( F \), averaged over \( k \) samples. We compute the Jacobians for all parameters:
+where \(\frac{\partial \mathbf{F}}{\partial \mathbf{W}_i}\) is the Jacobian of \(\mathbf{F}\) with respect to \(\mathbf{W}_i\), and \(\frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{F}^2} \in \mathbb{R}^{L \times d \times L \times d}\) is the Hessian of the loss with respect to \(\mathbf{F}\), averaged over \(k\) samples. We compute the Jacobians for all parameters:
 
-- \textbf{For \( W_V \):}
+- \textbf{For \(\mathbf{W}_V\):}
 \[
-\frac{\partial F}{\partial W_V} = A(X) X \otimes I_d,
+\frac{\partial \mathbf{F}}{\partial \mathbf{W}_V} = \mathbf{A}(\mathbf{X}) \mathbf{X} \otimes \mathbf{I}_d,
 \]
-since \( A(X) \) is independent of \( W_V \), and the derivative is a tensor in \( \mathbb{R}^{L \times d \times d \times d} \).
+since \(\mathbf{A}(\mathbf{X})\) is independent of \(\mathbf{W}_V\), and the derivative is a tensor in \(\mathbb{R}^{L \times d \times d \times d}\).
 
-- \textbf{For \( W_Q \):}
-Let \( T(X) = \frac{X W_Q W_K^\top X^\top}{\sqrt{d_K}} \), so \( A(X) = \text{softmax}(T(X)) \). Then:
+- \textbf{For \(\mathbf{W}_Q\):}
+Let \(\mathbf{T}(\mathbf{X}) = \frac{\mathbf{X} \mathbf{W}_Q \mathbf{W}_K^\top \mathbf{X}^\top}{\sqrt{d_K}}\), so \(\mathbf{A}(\mathbf{X}) = \text{softmax}(\mathbf{T}(\mathbf{X}))\). Then:
 \[
-\frac{\partial F}{\partial W_Q} = \frac{\partial A}{\partial T} \frac{\partial T}{\partial W_Q} X W_V.
+\frac{\partial \mathbf{F}}{\partial \mathbf{W}_Q} = \frac{\partial \mathbf{A}}{\partial \mathbf{T}} \frac{\partial \mathbf{T}}{\partial \mathbf{W}_Q} \mathbf{X} \mathbf{W}_V.
 \]
-The derivative \( \frac{\partial T}{\partial W_Q} = \frac{1}{\sqrt{d_K}} X \otimes (X W_K) \), and \( \frac{\partial A}{\partial T} \) is the Jacobian of the softmax, a fourth-order tensor. Thus:
+The derivative \(\frac{\partial \mathbf{T}}{\partial \mathbf{W}_Q} = \frac{1}{\sqrt{d_K}} \mathbf{X} \otimes (\mathbf{X} \mathbf{W}_K)\), and \(\frac{\partial \mathbf{A}}{\partial \mathbf{T}}\) is the Jacobian of the softmax, a fourth-order tensor. Thus:
 \[
-\frac{\partial F}{\partial W_Q} = \frac{1}{\sqrt{d_K}} \frac{\partial A}{\partial T} (X \otimes X W_K) X W_V.
+\frac{\partial \mathbf{F}}{\partial \mathbf{W}_Q} = \frac{1}{\sqrt{d_K}} \frac{\partial \mathbf{A}}{\partial \mathbf{T}} (\mathbf{X} \otimes \mathbf{X} \mathbf{W}_K) \mathbf{X} \mathbf{W}_V.
 \]
 
-- \textbf{For \( W_K \):}
+- \textbf{For \(\mathbf{W}_K\):}
 Similarly:
 \[
-\frac{\partial T}{\partial W_K} = \frac{1}{\sqrt{d_K}} (X W_Q) \otimes X,
+\frac{\partial \mathbf{T}}{\partial \mathbf{W}_K} = \frac{1}{\sqrt{d_K}} (\mathbf{X} \mathbf{W}_Q) \otimes \mathbf{X},
 \]
 so:
 \[
-\frac{\partial F}{\partial W_K} = \frac{1}{\sqrt{d_K}} \frac{\partial A}{\partial T} (X W_Q \otimes X) X W_V.
+\frac{\partial \mathbf{F}}{\partial \mathbf{W}_K} = \frac{1}{\sqrt{d_K}} \frac{\partial \mathbf{A}}{\partial \mathbf{T}} (\mathbf{X} \mathbf{W}_Q \otimes \mathbf{X}) \mathbf{X} \mathbf{W}_V.
 \]
 
-For each pair \( (W_i, W_j) \), \( H_o \) is computed by contracting the Jacobians with \( \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \). For example:
-- \( H_o(W_Q, W_K) = \frac{1}{d_K} \left( (X \otimes X W_K)^\top \frac{\partial A^\top}{\partial T} X W_V \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \left( \frac{\partial A}{\partial T} (X W_Q \otimes X) X W_V \right) \).
+For each pair \((\mathbf{W}_i, \mathbf{W}_j)\), \(\mathbf{H}_o\) is computed by contracting the Jacobians with \(\frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{F}^2}\). For example:
+- \(\mathbf{H}_o(\mathbf{W}_Q, \mathbf{W}_K) = \frac{1}{d_K} \left( (\mathbf{X} \otimes \mathbf{X} \mathbf{W}_K)^\top \frac{\partial \mathbf{A}^\top}{\partial \mathbf{T}} \mathbf{X} \mathbf{W}_V \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{F}^2} \left( \frac{\partial \mathbf{A}}{\partial \mathbf{T}} (\mathbf{X} \mathbf{W}_Q \otimes \mathbf{X}) \mathbf{X} \mathbf{W}_V \right)\).
 
-The full set of expressions follows this pattern, remaining general without specifying \( \frac{\partial^2 \mathcal{L}_k}{\partial F^2} \).
+The full set of expressions follows this pattern, remaining general without specifying \(\frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{F}^2}\).
 
-\subsubsection{Generalized Functional Hessian \( H_f \)}
-The functional Hessian accounts for the curvature of \( F \):
+\subsubsection{Generalized Functional Hessian \( \mathbf{H}_f \)}
+The functional Hessian accounts for the curvature of \(\mathbf{F}\):
 \[
-H_f(W_i, W_j) = \left( \frac{\partial \mathcal{L}_k}{\partial F} \otimes I_{p_i q_i} \right) \frac{\partial^2 F}{\partial W_i \partial W_j},
+\mathbf{H}_f(\mathbf{W}_i, \mathbf{W}_j) = \left( \frac{\partial \mathcal{L}_k}{\partial \mathbf{F}} \otimes \mathbf{I}_{p_i q_i} \right) \frac{\partial^2 \mathbf{F}}{\partial \mathbf{W}_i \partial \mathbf{W}_j},
 \]
-where \( \frac{\partial \mathcal{L}_k}{\partial F} \in \mathbb{R}^{L \times d} \) is the gradient of the loss with respect to \( F \), and \( p_i q_i \) is the size of \( W_i \) (e.g., \( d d_K \) for \( W_Q \)). The second derivative \( \frac{\partial^2 F}{\partial W_i \partial W_j} \) varies by pair:
+where \(\frac{\partial \mathcal{L}_k}{\partial \mathbf{F}} \in \mathbb{R}^{L \times d}\) is the gradient of the loss with respect to \(\mathbf{F}\), and \(p_i q_i\) is the size of \(\mathbf{W}_i\) (e.g., \(d d_K\) for \(\mathbf{W}_Q\)). The second derivative \(\frac{\partial^2 \mathbf{F}}{\partial \mathbf{W}_i \partial \mathbf{W}_j}\) varies by pair:
 
-- \textbf{\( H_f(W_V, W_V) \):} Since \( F = A X W_V \) is linear in \( W_V \), \( \frac{\partial^2 F}{\partial W_V \partial W_V} = 0 \), so \( H_f(W_V, W_V) = 0 \).
-- \textbf{\( H_f(W_Q, W_K) \):} 
+- \textbf{\(\mathbf{H}_f(\mathbf{W}_V, \mathbf{W}_V)\):} Since \(\mathbf{F} = \mathbf{A} \mathbf{X} \mathbf{W}_V\) is linear in \(\mathbf{W}_V\), \(\frac{\partial^2 \mathbf{F}}{\partial \mathbf{W}_V \partial \mathbf{W}_V} = 0\), so \(\mathbf{H}_f(\mathbf{W}_V, \mathbf{W}_V) = 0\).
+- \textbf{\(\mathbf{H}_f(\mathbf{W}_Q, \mathbf{W}_K)\):} 
 \[
-\frac{\partial^2 F}{\partial W_Q \partial W_K} = \frac{1}{d_K} \frac{\partial^2 A}{\partial T^2} \left( (X \otimes X W_K) \otimes (X W_Q \otimes X) \right) X W_V + \frac{1}{\sqrt{d_K}} \frac{\partial A}{\partial T} (X \otimes X),
+\frac{\partial^2 \mathbf{F}}{\partial \mathbf{W}_Q \partial \mathbf{W}_K} = \frac{1}{d_K} \frac{\partial^2 \mathbf{A}}{\partial \mathbf{T}^2} \left( (\mathbf{X} \otimes \mathbf{X} \mathbf{W}_K) \otimes (\mathbf{X} \mathbf{W}_Q \otimes \mathbf{X}) \right) \mathbf{X} \mathbf{W}_V + \frac{1}{\sqrt{d_K}} \frac{\partial \mathbf{A}}{\partial \mathbf{T}} (\mathbf{X} \otimes \mathbf{X}),
 \]
 \[
-H_f(W_Q, W_K) = \frac{1}{d_K} \left( \frac{\partial \mathcal{L}_k}{\partial F} \otimes I_{d d_K} \right) \left( \frac{\partial^2 A}{\partial T^2} \left( (X \otimes X W_K) \otimes (X W_Q \otimes X) \right) X W_V + \sqrt{d_K} \frac{\partial A}{\partial T} (X \otimes X) \right).
+\mathbf{H}_f(\mathbf{W}_Q, \mathbf{W}_K) = \frac{1}{d_K} \left( \frac{\partial \mathcal{L}_k}{\partial \mathbf{F}} \otimes \mathbf{I}_{d d_K} \right) \left( \frac{\partial^2 \mathbf{A}}{\partial \mathbf{T}^2} \left( (\mathbf{X} \otimes \mathbf{X} \mathbf{W}_K) \otimes (\mathbf{X} \mathbf{W}_Q \otimes \mathbf{X}) \right) \mathbf{X} \mathbf{W}_V + \sqrt{d_K} \frac{\partial \mathbf{A}}{\partial \mathbf{T}} (\mathbf{X} \otimes \mathbf{X}) \right).
 \]
 
-Other pairs follow similarly, with \( H_f \) non-zero when \( W_i \) and \( W_j \) both influence \( A(X) \).
+Other pairs follow similarly, with \(\mathbf{H}_f\) non-zero when \(\mathbf{W}_i\) and \(\mathbf{W}_j\) both influence \(\mathbf{A}(\mathbf{X})\).
 
 \subsection{Hessian of the Transformer Block}\label{subsec:hessian_transformer_block}
 
 A transformer block extends the self-attention layer with a feed-forward network (FFN), residual connections, and layer normalization. The output is:
 \[
-Y = \text{LayerNorm}(X + \text{SelfAttention}(X)),
+\mathbf{Y} = \text{LayerNorm}(\mathbf{X} + \text{SelfAttention}(\mathbf{X})),
 \]
 \[
-Z = \text{LayerNorm}(Y + \text{FFN}(Y)),
+\mathbf{Z} = \text{LayerNorm}(\mathbf{Y} + \text{FFN}(\mathbf{Y})),
 \]
-where \( \text{FFN}(Y) = \sigma(Y W_1 + b_1) W_2 + b_2 \), with \( W_1 \in \mathbb{R}^{d \times d_{\text{ff}}} \), \( W_2 \in \mathbb{R}^{d_{\text{ff}} \times d} \), \( b_1 \in \mathbb{R}^{d_{\text{ff}}} \), \( b_2 \in \mathbb{R}^{d} \), and \( \sigma \) as the activation (e.g., ReLU). The parameters are \( \omega = \{W_Q, W_K, W_V, W_1, W_2, b_1, b_2\} \), assuming fixed layer normalization parameters for simplicity.
+where \( \text{FFN}(\mathbf{Y}) = \sigma(\mathbf{Y} \mathbf{W}_1 + \mathbf{b}_1) \mathbf{W}_2 + \mathbf{b}_2 \), with \( \mathbf{W}_1 \in \mathbb{R}^{d \times d_{\text{ff}}} \), \( \mathbf{W}_2 \in \mathbb{R}^{d_{\text{ff}} \times d} \), \( b_1 \in \mathbb{R}^{d_{\text{ff}}} \), \( b_2 \in \mathbb{R}^{d} \), and \( \sigma \) as the activation (e.g., ReLU). The $\text{LayerNorm}(\mathbf{X})$ operation is defined as follows. For an input matrix \(\mathbf{X} \in \mathbb{R}^{n \times m}\) (where \(n\) is the batch size and \(m\) is the feature dimension), we compute:
+\begin{enumerate}
+    \item Feature-wise mean and variance:
+    \[
+    \mu_i = \frac{1}{m} \sum_{j=1}^m \mathbf{X}_{i,j}, \quad \sigma_i^2 = \frac{1}{m} \sum_{j=1}^m (\mathbf{X}_{i,j} - \mu_i)^2,
+    \]
+    where \(\epsilon > 0\) ensures numerical stability.
+    
+    \item Normalized output with learnable parameters \(\mathbf{\gamma}, \mathbf{\beta} \in \mathbb{R}^m\):
+    \[
+    \text{LayerNorm}(\mathbf{X})_{i,j} = \mathbf{\gamma}_j \cdot \frac{\mathbf{X}_{i,j} - \mu_i}{\sqrt{\sigma_i^2}} + \mathbf{\beta}_j.
+    \]
+\end{enumerate}
+
+Therefore the $\text{LayerNorm}(\mathbf{X})$ operation can be represented as follows:
+
+\[
+\text{LayerNorm}(\mathbf{X}) = \mathbf{\gamma} \odot \frac{\mathbf{X} - \mathbf{\mu} \mathbf{1}^\top}{\sqrt{\mathbf{\sigma}^2\mathbf{1}^\top + \epsilon}} + \mathbf{\beta}.
+\]
+
+The parameters are \( \mathbf{w} = \{\mathbf{W}_Q, \mathbf{W}_K, \mathbf{W}_V, \mathbf{W}_1, \mathbf{W}_2, \mathbf{b}_1, \mathbf{b}_2, \mathbf{\gamma}, \mathbf{\beta}\} \), where \(\mathbf{\gamma}\) and \(\mathbf{\beta}\) are the scale and shift parameters of LayerNorm. For simplicity in Hessian analysis, one may assume \(\mathbf{\gamma}\) and \(\mathbf{\beta}\) are fixed (e.g., \(\mathbf{\gamma} = \mathbf{1}\), \(\mathbf{\beta} = \mathbf{0}\)), though they are typically learnable. 
 
 \begin{theorem}\label{thm:transformer_hessian}
 
 NEED TO BE COMPLETED TODO
 
-For a transformer block with parameters \( \omega \), the Hessian of the loss \( \mathcal{L}_k \) with respect to parameters \( \omega_i, \omega_j \in \omega \) is:
+For a transformer block with parameters \( \mathbf{w} \), the Hessian of the loss \( \mathcal{L}_k \) with respect to parameters \( \mathbf{w}_i, \mathbf{w}_j \in \mathbf{w} \) is:
 \[
-\mathcal{H}_k = H_o + H_f,
+\mathbf{H}_k = \mathbf{H}_o + \mathbf{H}_f,
 \]
 where:
 \[
-H_o(\omega_i, \omega_j) = \left( \frac{\partial Z}{\partial \omega_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial Z^2} \left( \frac{\partial Z}{\partial \omega_j} \right),
+\mathbf{H}_o(\mathbf{w}_i, \mathbf{w}_j) = \left( \frac{\partial \mathbf{Z}}{\partial \mathbf{w}_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{Z}^2} \left( \frac{\partial \mathbf{Z}}{\partial \mathbf{w}_j} \right),
 \]
 \[
-H_f(\omega_i, \omega_j) = \left( \frac{\partial \mathcal{L}_k}{\partial Z} \otimes I_{p_i q_i} \right) \frac{\partial^2 Z}{\partial \omega_i \partial \omega_j}.
+\mathbf{H}_f(\mathbf{w}_i, \mathbf{w}_j) = \left( \frac{\partial \mathcal{L}_k}{\partial \mathbf{Z}} \otimes \mathbf{I}_{p_i q_i} \right) \frac{\partial^2 \mathbf{Z}}{\partial \mathbf{w}_i \partial \mathbf{w}_j}.
 \]
 \end{theorem}
 
-The Jacobians \( \frac{\partial Z}{\partial \omega_i} \) are computed via the chain rule through the layers, incorporating derivatives from both the self-attention and FFN components, adjusted for layer normalization. The proof is provided in Appendix~\ref{app:proof_transformer_hessian}.
+The Jacobians \( \frac{\partial \mathbf{Z}}{\partial \mathbf{w}_i} \) are computed via the chain rule through the layers, incorporating derivatives from both the self-attention and FFN components, adjusted for layer normalization. The proof is provided in Appendix~\ref{app:proof_transformer_hessian}.
 
 \subsection{Convergence of the Loss Function Surface}\label{subsec:loss_convergence}
 
-AS IN THE PAPER (NEED REFERENCES)
+Similarly to \cite{kiselev2024unraveling} let us use second-order Taylor approximation for the mentioned above loss functions at \(\mathbf{w}^*\). We suppose that decomposition to the second order will be sufficient to study local behavior. The first-order term vanishes because the gradients \(\nabla \mathcal{L}_{k}(\mathbf{w}^*)\) and \(\nabla \mathcal{L}_{k+1}(\mathbf{w}^*)\) are zero:
+\begin{equation}\label{eq:approx}
+    \mathcal{L}_{k}(\mathbf{w}) \approx \mathcal{L}_{k}(\mathbf{w}^*) + \dfrac{1}{2} (\mathbf{w} - \mathbf{w}^*)^\top \mathbf{H}_k(\mathbf{w}^*) (\mathbf{w} - \mathbf{w}^*),
+\end{equation}
+where we denoted the Hessian of \(\mathcal{L}_{k}(\mathbf{w})\) with respect to parameters \(\mathbf{w}\) at \(\mathbf{w}^*\) as \(\mathbf{H}_k(\mathbf{w}^*) \in \mathbb{R}^{P \times P}\). Moreover, the total Hessian can be written as the average value of the Hessians of the individual terms of the empirical loss function:
+\[ \mathbf{H}_k(\mathbf{w}) = \nabla^2_{\mathbf{w}} \mathcal{L}_{k}(\mathbf{w}) = \dfrac{1}{k} \sum_{i=1}^{k} \nabla^2_{\mathbf{w}} l(\mathbf{f}_{\mathbf{w}}(\mathbf{x}_{i}), \mathbf{y}_{i}) = \dfrac{1}{k} \sum_{i=1}^{k} \mathbf{H}_i(\mathbf{w}). \]
+Therefore, using the obtained second-order approximation~\eqref{eq:approx}, the formula for the difference of losses becomes:
+\[ \mathcal{L}_{k+1}(\mathbf{w}) - \mathcal{L}_k(\mathbf{w}) = \dfrac{1}{k+1} \left( l(\mathbf{f}_{\mathbf{w}^*}(\mathbf{x}_{k+1}), \mathbf{y}_{k+1}) - \dfrac{1}{k} \sum_{i=1}^{k} l(\mathbf{f}_{\mathbf{w}^*}(\mathbf{x}_{i}), \mathbf{y}_{i}) \right) + \]
+\[ + \dfrac{1}{2} (\mathbf{w} - \mathbf{w}^*)^\top \left( \mathbf{H}_{k+1}(\mathbf{w}^*) - \dfrac{1}{k} \sum_{i=1}^{k} \mathbf{H}_i(\mathbf{w}^*) \right) (\mathbf{w} - \mathbf{w}^*). \]
+After that, using the triangle inequality, we can derive the following:
+\[ \left| \mathcal{L}_{k+1}(\mathbf{w}) - \mathcal{L}_k(\mathbf{w}) \right| \leqslant \dfrac{1}{k+1} \left| l(\mathbf{f}_{\mathbf{w}^*}(\mathbf{x}_{k+1}), \mathbf{y}_{k+1}) - \dfrac{1}{k} \sum_{i=1}^{k} l(\mathbf{f}_{\mathbf{w}^*}(\mathbf{x}_{i}), \mathbf{y}_{i}) \right| + \]
+\[ + \dfrac{1}{2 (k+1)} \left\| \mathbf{w} - \mathbf{w}^* \right\|_2^2 \left\| \mathbf{H}_{k+1}(\mathbf{w}^*) - \dfrac{1}{k} \sum_{i=1}^{k} \mathbf{H}_i(\mathbf{w}^*) \right\|_2. \]
+So the problem of the boundedness and convergence of the losses difference is reduced to the analysis of the two terms:
+\begin{itemize}
+    \item Difference of the \textbf{loss functions at optima} for new object and previous ones:
+    \[ \left| l(\mathbf{f}_{\mathbf{w}^*}(\mathbf{x}_{k+1}), \mathbf{y}_{k+1}) - \dfrac{1}{k} \sum_{i=1}^{k} l(\mathbf{f}_{\mathbf{w}^*}(\mathbf{x}_{i}), \mathbf{y}_{i}) \right|, \]
+    \item Difference of the \textbf{Hessians at optima} for new object and previous ones:
+    \[ \left\| \mathbf{H}_{k+1}(\mathbf{w}^*) - \dfrac{1}{k} \sum_{i=1}^{k} \mathbf{H}_i(\mathbf{w}^*) \right\|_2. \]
+\end{itemize}
 
-We apply the Hessian expressions to estimate the convergence of the loss difference \( \Delta_k = \int ( \mathcal{L}_k(\omega) - \mathcal{L}_{k-1}(\omega) )^2 p(\omega) d\omega \). The loss difference is:
-\[
-\mathcal{L}_{k+1}(\omega) - \mathcal{L}_k(\omega) = \frac{1}{k+1} \left( l_{k+1}(\omega) - \mathcal{L}_k(\omega) \right).
-\]
-Using a second-order Taylor expansion around a local minimum \( \omega^* \) (where \( \nabla \mathcal{L}_k(\omega^*) = 0 \)):
-\[
-\mathcal{L}_k(\omega) \approx \mathcal{L}_k(\omega^*) + \frac{1}{2} (\omega - \omega^*)^\top \mathcal{H}_k(\omega^*) (\omega - \omega^*),
-\]
-\[
-\mathcal{L}_{k+1}(\omega) - \mathcal{L}_k(\omega) \approx \frac{1}{2} (\omega - \omega^*)^\top ( \mathcal{H}_{k+1}(\omega^*) - \mathcal{H}_k(\omega^*) ) (\omega - \omega^*).
-\]
-Thus:
-\[
-\Delta_{k+1} \approx \mathbb{E}_{p(\omega)} \left[ \left( \frac{1}{2} (\omega - \omega^*)^\top ( \mathcal{H}_{k+1}(\omega^*) - \mathcal{H}_k(\omega^*) ) (\omega - \omega^*) \right)^2 \right].
-\]
-Substituting \( \mathcal{H}_k = H_o^{(k)} + H_f^{(k)} \) from Theorem~\ref{thm:transformer_hessian}:
-\[
-\mathcal{H}_{k+1} - \mathcal{H}_k = ( H_o^{(k+1)} - H_o^{(k)} ) + ( H_f^{(k+1)} - H_f^{(k)} ),
-\]
-where:
-\[
-H_o^{(k)} = \frac{1}{k} \sum_{i=1}^k \left( \frac{\partial Z_i}{\partial \omega} \right)^\top \frac{\partial^2 l_i}{\partial Z_i^2} \left( \frac{\partial Z_i}{\partial \omega} \right),
-\]
-\[
-H_f^{(k)} = \frac{1}{k} \sum_{i=1}^k \left( \frac{\partial l_i}{\partial Z_i} \otimes I \right) \frac{\partial^2 Z_i}{\partial \omega \partial \omega}.
-\]
-As \( k \) increases, the difference \( \mathcal{H}_{k+1} - \mathcal{H}_k \) diminishes due to averaging, leading to \( \Delta_k \to 0 \). The rate of convergence depends on the spectral properties of \( H_o \) and \( H_f \), reflecting the transformer block’s architecture and the loss function’s curvature.
+It should be mentioned that the first term can be easily upper-bounded by a constant, since the loss function itself takes limited values. However, the expression with Hessians is not so easy to evaluate. The rest of the work is devoted to a thorough analysis of this difference. Thus, we analyze the local convergence of the landscape of the loss function using its Hessian. As a consequence of Theorem~\ref{thm:transformer_hessian} regarding the decomposition of the transformer block, the Hessian \(\mathbf{H}_k\) can be expressed as \(\mathbf{H}_k = \mathbf{H}_o + \mathbf{H}_f\), where \(\mathbf{H}_o\) and \(\mathbf{H}_f\) are the outer-product and functional Hessians, respectively, as derived earlier.
 
 \section{Experiments}\label{sec:exp}
 
@@ -484,25 +472,25 @@ TODO
 \subsection{Proof of Theorem~\ref{thm:transformer_hessian}}\label{app:proof_transformer_hessian}
 NEED TO BE COMPLETED TODO
 \begin{proof}
-Consider the transformer block output \( Z = \text{LayerNorm}(Y + \text{FFN}(Y)) \), where \( Y = \text{LayerNorm}(X + \text{SelfAttention}(X)) \), and the empirical loss \( \mathcal{L}_k(\omega) = \frac{1}{k} \sum_{i=1}^k l(Z_i, Y_i) \). The Hessian is:
+Consider the transformer block output \(\mathbf{Z} = \text{LayerNorm}(\mathbf{Y} + \text{FFN}(\mathbf{Y}))\), where \(\mathbf{Y} = \text{LayerNorm}(\mathbf{X} + \text{SelfAttention}(\mathbf{X}))\), and the empirical loss \(\mathcal{L}_k(\mathbf{w}) = \frac{1}{k} \sum_{i=1}^k l(\mathbf{Z}_i, \mathbf{Y}_i)\). The Hessian is:
 \[
-\mathcal{H}_k(\omega) = \nabla^2_\omega \mathcal{L}_k(\omega) = \frac{1}{k} \sum_{i=1}^k \nabla^2_\omega l_i(\omega).
+\mathbf{H}_k(\mathbf{w}) = \nabla^2_{\mathbf{w}} \mathcal{L}_k(\mathbf{w}) = \frac{1}{k} \sum_{i=1}^k \nabla^2_{\mathbf{w}} l_i(\mathbf{w}).
 \]
-For parameters \( \omega_i, \omega_j \in \omega \), apply the chain rule to the composite function \( \mathcal{L}_k \circ Z \):
+For parameters \(\mathbf{w}_i, \mathbf{w}_j \in \mathbf{w}\), apply the chain rule to the composite function \(\mathcal{L}_k \circ \mathbf{Z}\):
 \[
-\frac{\partial^2 \mathcal{L}_k}{\partial \omega_i \partial \omega_j} = \frac{\partial}{\partial \omega_i} \left( \left( \frac{\partial Z}{\partial \omega_j} \right)^\top \frac{\partial \mathcal{L}_k}{\partial Z} \right).
+\frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{w}_i \partial \mathbf{w}_j} = \frac{\partial}{\partial \mathbf{w}_i} \left( \left( \frac{\partial \mathbf{Z}}{\partial \mathbf{w}_j} \right)^\top \frac{\partial \mathcal{L}_k}{\partial \mathbf{Z}} \right).
 \]
 Using the product rule:
 \[
-\frac{\partial^2 \mathcal{L}_k}{\partial \omega_i \partial \omega_j} = \left( \frac{\partial Z}{\partial \omega_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial Z^2} \left( \frac{\partial Z}{\partial \omega_j} \right) + \left( \frac{\partial \mathcal{L}_k}{\partial Z} \otimes I_{p_i q_i} \right) \frac{\partial^2 Z}{\partial \omega_i \partial \omega_j}.
+\frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{w}_i \partial \mathbf{w}_j} = \left( \frac{\partial \mathbf{Z}}{\partial \mathbf{w}_i} \right)^\top \frac{\partial^2 \mathcal{L}_k}{\partial \mathbf{Z}^2} \left( \frac{\partial \mathbf{Z}}{\partial \mathbf{w}_j} \right) + \left( \frac{\partial \mathcal{L}_k}{\partial \mathbf{Z}} \otimes \mathbf{I}_{p_i q_i} \right) \frac{\partial^2 \mathbf{Z}}{\partial \mathbf{w}_i \partial \mathbf{w}_j}.
 \]
-- \textbf{Outer-Product Term:} TODO The first term, \( H_o \), arises from the derivative of the loss with respect to \( Z \), requiring the Jacobians \( \frac{\partial Z}{\partial \omega_i} \), computed via:
+- \textbf{Outer-Product Term:} TODO The first term, \(\mathbf{H}_o\), arises from the derivative of the loss with respect to \(\mathbf{Z}\), requiring the Jacobians \(\frac{\partial \mathbf{Z}}{\partial \mathbf{w}_i}\), calculated as follows:
 \[
-\frac{\partial Z}{\partial \omega_i} = \frac{\partial \text{LayerNorm}}{\partial (Y + \text{FFN}(Y))} \left( \frac{\partial Y}{\partial \omega_i} + \frac{\partial \text{FFN}}{\partial Y} \frac{\partial Y}{\partial \omega_i} \right),
+\frac{\partial \mathbf{Z}}{\partial \mathbf{w}_i} = \frac{\partial \text{LayerNorm}}{\partial (\mathbf{Y} + \text{FFN}(\mathbf{Y}))} \left( \frac{\partial \mathbf{Y}}{\partial \mathbf{w}_i} + \frac{\partial \text{FFN}}{\partial \mathbf{Y}} \frac{\partial \mathbf{Y}}{\partial \mathbf{w}_i} \right) = ,
 \]
-where \( \frac{\partial Y}{\partial \omega_i} \) involves the self-attention derivatives adjusted for layer normalization.
+where \(\frac{\partial \mathbf{Y}}{\partial \mathbf{w}_i}\) involves the self-attention derivatives adjusted for layer normalization.
 
-- \textbf{Functional Term:} TODO The second term, \( H_f \), involves the second derivative of \( Z \), which is non-zero for pairs affecting intermediate layers (e.g., \( W_Q \) and \( W_K \)) and zero when \( Z \) is linear in a parameter (e.g., \( W_2 \)).
+- \textbf{Functional Term:} TODO The second term, \(\mathbf{H}_f\), involves the second derivative of \(\mathbf{Z}\), which is non-zero for pairs affecting intermediate layers (e.g., \(\mathbf{W}_Q\) and \(\mathbf{W}_K\)) and zero when \(\mathbf{Z}\) is linear in a parameter (e.g., \(\mathbf{W}_2\)).
 
 This decomposition holds for all parameter pairs, completing the proof.
 \end{proof}
