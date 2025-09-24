@@ -10,7 +10,7 @@ This repository contains source code for our paper. The code includes data proce
 Clone the repo:
 ```bash
 git clone https://github.com/intsystems/2025-Project-182.git
-cd code
+cd 2025-Project-182/code
 ```
 
 Install dependencies:

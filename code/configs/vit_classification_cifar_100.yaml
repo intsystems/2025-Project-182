@@ -1,0 +1,56 @@
+common:
+  seed: 21
+  root_dir: /home/jovyan/shares/SR008.fs2/nkiselev/sandbox/2025-Project-182/code/results/vit_classification_seed_${common.seed}
+  experiment_name: cifar_100
+
+trainer:
+  device: cuda:0
+  num_epochs: 100
+  checkpoint_path: null
+  conf_path: ${common.root_dir}/${common.experiment_name}/config.yaml
+  checkpoint:
+    root_dir: ${common.root_dir}/${common.experiment_name}/checkpoints
+    last_save_interval: 1000
+    regular_save_interval: 10000
+
+model:
+  checkpoint_path: null
+  params:
+    input_dim: 32
+    num_channels: 3
+    patch_size: 4
+    model_dim: 128
+    ff_dim: 512
+    num_blocks: 8
+    num_classes: 100
+
+data:
+  name: CIFAR-100
+  root: /home/jovyan/shares/SR008.fs2/nkiselev/sandbox/2025-Project-182/code/data/CIFAR-100
+  input_dim: ${model.params.input_dim}
+  batch_size: 128
+  normalization: imagenet
+  seed: ${common.seed}
+
+optimizer:
+  max_norm: 1.0
+  params:
+    lr: 1e-3
+    weight_decay: 0.0
+    betas:
+    - 0.9
+    - 0.95
+    eps: 1.0e-08
+
+scheduler:
+  params:
+    num_warmup_steps: 100
+
+logger:
+  log_interval: 100
+  tensorboard:
+    log_dir: ${common.root_dir}/${common.experiment_name}/tb_logs
+
+metrics:
+  validate_on_start: true
+  validation_interval: 1000

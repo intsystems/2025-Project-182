@@ -1,0 +1,30 @@
+common:
+  seed: 21
+  root_dir: /home/jovyan/shares/SR008.fs2/nkiselev/sandbox/2025-Project-182/code/results/vit_classification
+  experiment_name: test
+
+experiment:
+  save_path: /home/jovyan/shares/SR008.fs2/nkiselev/sandbox/2025-Project-182/code/results/experiments/vit_classification/assumption_1_seed_${common.seed}.csv
+
+trainer:
+  device: cuda:0
+  num_epochs: 26
+
+model:
+  checkpoint_path: /home/jovyan/shares/SR008.fs2/nkiselev/sandbox/2025-Project-182/code/results/vit_classification_seed_${common.seed}/cifar_100/checkpoints/step_10000/model.pt
+  params:
+    input_dim: 32
+    num_channels: 3
+    patch_size: 4
+    model_dim: 128
+    ff_dim: 512
+    num_blocks: 8
+    num_classes: 100
+
+data:
+  name: CIFAR-100
+  root: /home/jovyan/shares/SR008.fs2/nkiselev/sandbox/2025-Project-182/code/data/CIFAR-100
+  input_dim: ${model.params.input_dim}
+  batch_size: 128
+  normalization: imagenet
+  seed: ${common.seed}
